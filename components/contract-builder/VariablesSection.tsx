@@ -1,21 +1,7 @@
 import { useState } from 'react';
-import { VariableDefinition } from '@/types/contracts';
+import { VariableDefinition, FunctionDefinition, EventDefinition } from '@/types/contracts';
 
-interface VariablesSectionProps {
-  variables: VariableDefinition[];
-  onUpdate: (variables: VariableDefinition[]) => void;
-}
-
-export default function VariablesSection({ variables, onUpdate }: VariablesSectionProps) {
-  const addVariable = () => {
-    const newVariable: VariableDefinition = {
-      name: '',
-      type: 'uint256',
-      visibility: 'private',
-      constant: false,
-    };
-    onUpdate([...variables, newVariable]);
-  };
+export default function VariablesSection({ variables, onUpdate, onAddFunction, onAddEvent }: VariablesSectionProps) {
 
   const updateVariable = (index: number, field: keyof VariableDefinition, value: any) => {
     const updatedVariables = [...variables];
@@ -32,21 +18,11 @@ export default function VariablesSection({ variables, onUpdate }: VariablesSecti
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Contract Variables</h2>
-        <button
-          onClick={addVariable}
-          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-        >
-          Add Variable
-        </button>
-      </div>
-
-      <div className="space-y-4">
+    <div>
+      <div className="space-y-2">
         {variables.map((variable, index) => (
-          <div key={index} className="bg-white p-4 rounded-lg shadow">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div key={index} className="bg-gray-50 p-3 rounded-lg shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Name</label>
                 <input
@@ -75,7 +51,7 @@ export default function VariablesSection({ variables, onUpdate }: VariablesSecti
                 <label className="block text-sm font-medium text-gray-700">Visibility</label>
                 <select
                   value={variable.visibility}
-                  onChange={(e) => updateVariable(index, 'visibility', e.target.value)}
+                  onChange={(e) => updateVariable(index, 'visibility', e.target.value as 'public' | 'private' | 'internal' | 'external')}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                 >
                   <option value="public">public</option>
@@ -96,7 +72,7 @@ export default function VariablesSection({ variables, onUpdate }: VariablesSecti
                 </label>
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-2">
               <label className="block text-sm font-medium text-gray-700">Default Value</label>
               <input
                 type="text"
@@ -107,7 +83,7 @@ export default function VariablesSection({ variables, onUpdate }: VariablesSecti
             </div>
             <button
               onClick={() => removeVariable(index)}
-              className="mt-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              className="mt-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-sm"
             >
               Remove
             </button>

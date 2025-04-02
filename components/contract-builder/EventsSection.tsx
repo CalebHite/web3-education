@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import { EventDefinition, EventParameter } from '@/types/contracts';
+interface VariablesSectionProps {
+  variables: VariableDefinition[];
+  onUpdate: (variables: VariableDefinition[]) => void;
+  onAddFunction: (function_: FunctionDefinition) => void;
+  onAddEvent: (event: EventDefinition) => void;
+}
+
+type SectionType = 'variable' | 'function' | 'event';
 
 interface EventsSectionProps {
   events: EventDefinition[];
@@ -7,6 +15,12 @@ interface EventsSectionProps {
 }
 
 export default function EventsSection({ events, onUpdate }: EventsSectionProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const [currentEvent, setCurrentEvent] = useState<EventDefinition>({
+    name: '',
+    parameters: [],
+  });
+
   const addEvent = () => {
     const newEvent: EventDefinition = {
       name: '',
@@ -55,97 +69,124 @@ export default function EventsSection({ events, onUpdate }: EventsSectionProps) 
     onUpdate(updatedEvents);
   };
 
+  const saveEvent = () => {
+    onUpdate([...events, currentEvent]);
+    setIsAdding(false);
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Contract Events</h2>
-        <button
-          onClick={addEvent}
-          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-        >
-          Add Event
-        </button>
-      </div>
+    <div className="space-y-2">
+      {isAdding ? (
+        <div className="border rounded-lg p-3">
+          <div className="mb-2">
+            <label className="block text-sm font-medium mb-1">Event Name</label>
+            <input
+              type="text"
+              className="w-full p-2 border rounded"
+              value={currentEvent.name}
+              onChange={(e) => setCurrentEvent({...currentEvent, name: e.target.value})}
+            />
+          </div>
 
-      <div className="space-y-4">
-        {events.map((event, eventIndex) => (
-          <div key={eventIndex} className="bg-white p-4 rounded-lg shadow">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Event Name</label>
-              <input
-                type="text"
-                value={event.name}
-                onChange={(e) => updateEvent(eventIndex, 'name', e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              />
+          <div className="mb-2">
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-sm font-medium">Parameters</label>
+              <button 
+                type="button" 
+                className="text-sm text-blue-600"
+                onClick={() => addParameter(events.length)}
+              >
+                + Add Parameter
+              </button>
             </div>
-
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-md font-medium">Parameters</h3>
-                <button
-                  onClick={() => addParameter(eventIndex)}
-                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+            
+            {currentEvent.parameters.map((param, idx) => (
+              <div key={idx} className="flex gap-2 mb-1">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  className="flex-1 p-1 border rounded"
+                  value={param.name}
+                  onChange={(e) => updateParameter(events.length, idx, 'name', e.target.value)}
+                />
+                <select
+                  className="flex-1 p-1 border rounded"
+                  value={param.type}
+                  onChange={(e) => updateParameter(events.length, idx, 'type', e.target.value)}
                 >
-                  Add Parameter
+                  <option value="uint256">uint256</option>
+                  <option value="string">string</option>
+                  <option value="address">address</option>
+                  <option value="bool">bool</option>
+                  <option value="bytes">bytes</option>
+                </select>
+                <select
+                  className="w-24 p-1 border rounded"
+                  value={param.indexed ? 'indexed' : 'not-indexed'}
+                  onChange={(e) => updateParameter(events.length, idx, 'indexed', e.target.value === 'indexed')}
+                >
+                  <option value="not-indexed">Not Indexed</option>
+                  <option value="indexed">Indexed</option>
+                </select>
+                <button 
+                  type="button" 
+                  className="text-red-500"
+                  onClick={() => removeParameter(events.length, idx)}
+                >
+                  ✕
                 </button>
               </div>
-
-              {event.parameters.map((parameter, paramIndex) => (
-                <div key={paramIndex} className="bg-gray-50 p-4 rounded">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Name</label>
-                      <input
-                        type="text"
-                        value={parameter.name}
-                        onChange={(e) => updateParameter(eventIndex, paramIndex, 'name', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Type</label>
-                      <select
-                        value={parameter.type}
-                        onChange={(e) => updateParameter(eventIndex, paramIndex, 'type', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                      >
-                        <option value="uint256">uint256</option>
-                        <option value="int256">int256</option>
-                        <option value="address">address</option>
-                        <option value="bool">bool</option>
-                        <option value="string">string</option>
-                        <option value="bytes">bytes</option>
-                      </select>
-                    </div>
-                    <div className="flex items-center">
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={parameter.indexed}
-                          onChange={(e) => updateParameter(eventIndex, paramIndex, 'indexed', e.target.checked)}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="ml-2 text-sm text-gray-700">Indexed</span>
-                      </label>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeParameter(eventIndex, paramIndex)}
-                    className="mt-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  >
-                    Remove Parameter
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => removeEvent(eventIndex)}
-              className="mt-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            ))}
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <button 
+              type="button" 
+              className="bg-gray-200 py-1 px-3 rounded text-sm"
+              onClick={() => setIsAdding(false)}
             >
-              Remove Event
+              Cancel
             </button>
+            <button 
+              type="button" 
+              className="bg-blue-600 text-white py-1 px-3 rounded text-sm disabled:bg-blue-300"
+              disabled={!currentEvent.name}
+              onClick={saveEvent}
+            >
+              Add Event
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button 
+          type="button"
+          className="text-blue-600 font-medium text-sm"
+          onClick={() => setIsAdding(true)}
+        >
+          + Add Event
+        </button>
+      )}
+
+      <div className="space-y-2">
+        {events.map((event, index) => (
+          <div key={index} className="bg-gray-50 p-3 rounded-lg shadow-sm">
+            <div className="flex justify-between items-center mb-2">
+              <div>
+                <span className="font-medium">{event.name}</span>
+              </div>
+              <button 
+                type="button"
+                className="text-red-500 text-sm"
+                onClick={() => removeEvent(index)}
+              >
+                Remove
+              </button>
+            </div>
+            <div className="text-sm text-gray-600">
+              Parameters: {event.parameters.map(param => 
+                `${param.type} ${param.name}${param.indexed ? ' (indexed)' : ''}`
+              ).join(', ') || 'none'}
+            </div>
           </div>
         ))}
       </div>

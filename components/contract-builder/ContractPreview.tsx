@@ -1,11 +1,14 @@
 // components/contract-builder/ContractPreview.tsx
 import { ContractFormData } from '@/types/contracts';
+import { useState } from 'react';
 
 interface ContractPreviewProps {
   contractData: ContractFormData;
 }
 
 export default function ContractPreview({ contractData }: ContractPreviewProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   const generateSolidityCode = (data: ContractFormData): string => {
     let code = `// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
@@ -102,8 +105,28 @@ pragma solidity ^0.8.20;
   const solidityCode = generateSolidityCode(contractData);
 
   return (
-    <pre className="font-mono text-sm bg-gray-800 text-gray-100 p-4 rounded-lg overflow-auto h-full">
-      <code>{solidityCode}</code>
-    </pre>
+    <div className="fixed bottom-4 right-4 z-50 w-96">
+      <div 
+        className="bg-white rounded-lg shadow-lg overflow-hidden"
+        style={{ maxHeight: isExpanded ? '80vh' : 'auto' }}
+      >
+        <div 
+          className="flex justify-between items-center p-3 bg-gray-800 text-white cursor-pointer hover:bg-gray-700"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <h2 className="text-sm font-semibold">Contract Preview</h2>
+          <button className="text-white hover:text-gray-200">
+            {isExpanded ? '▼' : '▶'}
+          </button>
+        </div>
+        {isExpanded && (
+          <div className="p-3 bg-gray-900">
+            <pre className="font-mono text-xs text-gray-100 overflow-auto" style={{ maxHeight: 'calc(80vh - 40px)' }}>
+              <code>{solidityCode}</code>
+            </pre>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

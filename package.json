@@ -11,10 +11,12 @@
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@openzeppelin/contracts": "^5.2.0",
+    "@types/react-beautiful-dnd": "^13.1.8",
     "ethers": "^6.13.5",
     "hardhat": "^2.22.19",
     "next": "15.2.4",
     "react": "^19.0.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.55.0",
     "web3": "^4.16.0",
