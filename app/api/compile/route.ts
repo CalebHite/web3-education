@@ -2,36 +2,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { compileContract } from '@/services/contractCompiler';
 import { ContractFormData } from '@/types/contracts';
+import solc from 'solc';
 
-export async function POST(req: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const contractData: ContractFormData = await req.json();
-    
-    if (!contractData || !contractData.name) {
-      return NextResponse.json(
-        { error: 'Invalid contract data' },
-        { status: 400 }
-      );
-    }
-    
-    const result = await compileContract(contractData);
-    
-    if (result.success) {
+    const { sourceCode, contractName } = await request.json();
+
+    // Create input object for solc compiler
+    const input = {
+      language: 'Solidity',
+      sources: {
+        'contract.sol': {
+          content: sourceCode
+        }
+      },
+      settings: {
+        outputSelection: {
+          '*': {
+            '*': ['*']
+          }
+        },
+        optimizer: {
+          enabled: true,
+          runs: 200
+        }
+      }
+    };
+
+    // Compile the contract
+    const output = JSON.parse(solc.compile(JSON.stringify(input)));
+
+    // Check for errors
+    if (output.errors?.some((error: any) => error.severity === 'error')) {
+      const errorMessage = output.errors
+        .filter((error: any) => error.severity === 'error')
+        .map((error: any) => error.message)
+        .join('\n');
+      
       return NextResponse.json({
-        success: true,
-        message: result.message,
-        artifacts: result.artifacts
+        success: false,
+        error: errorMessage
       });
-    } else {
-      return NextResponse.json(
-        { success: false, error: result.message },
-        { status: 400 }
-      );
     }
+
+    // Extract compilation results
+    const contract = output.contracts['contract.sol'][contractName];
+    
+    return NextResponse.json({
+      success: true,
+      abi: contract.abi,
+      bytecode: contract.evm.bytecode.object
+    });
+
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    console.error('Compilation error:', error);
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown compilation error'
+    });
   }
 }

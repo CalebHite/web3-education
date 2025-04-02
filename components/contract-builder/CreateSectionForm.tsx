@@ -10,6 +10,59 @@ interface CreateSectionFormProps {
   type: SectionType;
 }
 
+const QUICK_FUNCTION_TEMPLATES = [
+  {
+    name: 'mint',
+    template: {
+      name: 'mint',
+      inputs: [
+        { name: 'to', type: 'address' },
+        { name: 'amount', type: 'uint256' }
+      ],
+      outputs: [],
+      visibility: 'public',
+      stateMutability: 'nonpayable',
+      code: '// Mint tokens\n_mint(to, amount);'
+    }
+  },
+  {
+    name: 'transfer',
+    template: {
+      name: 'transfer',
+      inputs: [
+        { name: 'to', type: 'address' },
+        { name: 'amount', type: 'uint256' }
+      ],
+      outputs: [{ type: 'bool' }],
+      visibility: 'public',
+      stateMutability: 'nonpayable',
+      code: '// Transfer tokens\nreturn _transfer(msg.sender, to, amount);'
+    }
+  },
+  {
+    name: 'deposit',
+    template: {
+      name: 'deposit',
+      inputs: [],
+      outputs: [],
+      visibility: 'public',
+      stateMutability: 'payable',
+      code: '// Handle deposit\nrequire(msg.value > 0, "Must send ETH");\n// Add your deposit logic here'
+    }
+  },
+  {
+    name: 'withdraw',
+    template: {
+      name: 'withdraw',
+      inputs: [{ name: 'amount', type: 'uint256' }],
+      outputs: [],
+      visibility: 'public',
+      stateMutability: 'nonpayable',
+      code: '// Handle withdrawal\nrequire(amount > 0, "Amount must be positive");\n// Add your withdrawal logic here'
+    }
+  }
+];
+
 export default function CreateSectionForm({ onCancel, onSubmit, title, type }: CreateSectionFormProps) {
   const [formData, setFormData] = useState<any>(() => {
     switch (type) {
@@ -41,7 +94,14 @@ export default function CreateSectionForm({ onCancel, onSubmit, title, type }: C
 
   const handleSubmit = () => {
     if (!formData.name) return;
-    onSubmit(formData);
+    
+    // Create a copy of the form data to submit
+    const dataToSubmit = { ...formData };
+    
+    // Submit the data
+    onSubmit(dataToSubmit);
+    
+    // Then reset the form
     setFormData(() => {
       switch (type) {
         case 'variable':
@@ -235,6 +295,22 @@ export default function CreateSectionForm({ onCancel, onSubmit, title, type }: C
       {/* Function specific fields */}
       {type === 'function' && (
         <>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Quick Functions</label>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_FUNCTION_TEMPLATES.map((template) => (
+                <button
+                  key={template.name}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, ...template.template })}
+                  className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 text-sm"
+                >
+                  {template.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="mb-4">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium">Inputs</label>

@@ -92,20 +92,21 @@ pragma solidity ^0.8.20;
             .join('\n');
           code += indentedCode + '\n';
         } else {
-          code += '        // Function implementation\n';
+          code += '        // TODO: Implement function\n';
         }
         code += '    }\n\n';
       });
     }
 
     code += '}';
+    console.log(code);
     return code;
   };
 
   const solidityCode = generateSolidityCode(contractData);
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 w-96">
+    <div className="fixed bottom-4 right-4 z-50 w-150">
       <div 
         className="bg-white rounded-lg shadow-lg overflow-hidden"
         style={{ maxHeight: isExpanded ? '80vh' : 'auto' }}
