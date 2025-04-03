@@ -7,6 +7,7 @@ export interface Lesson {
   content: string;
   author: string;
   icon?: string; // Icon name from lucide-react
+  notionUrl?: string; // URL to the Notion page
   createdAt?: Date;
   updatedAt?: Date;
   ipfsHash?: string;
@@ -65,6 +66,7 @@ export async function uploadLesson(lesson: Lesson): Promise<Lesson> {
  */
 export async function getLesson(ipfsHash: string): Promise<Lesson> {
   try {
+    console.log(`Attempting to retrieve lesson with hash: ${ipfsHash}`);
     // Use the public gateway to retrieve the content
     const response = await axios.get(`https://gateway.pinata.cloud/ipfs/${ipfsHash}`);
     return response.data;
@@ -80,6 +82,7 @@ export async function getLesson(ipfsHash: string): Promise<Lesson> {
  */
 export async function getAllLessons(): Promise<Lesson[]> {
   try {
+    console.log("Fetching lessons from Pinata...");
     // Get all pinned items from Pinata
     const response = await pinataApi.get('/data/pinList', {
       params: {
@@ -88,19 +91,31 @@ export async function getAllLessons(): Promise<Lesson[]> {
       },
     });
 
-    // Filter for JSON files (assuming lessons are stored as JSON)
-    const lessonPins = response.data.rows.filter((pin: any) => {
-      // Safely check if metadata and name exist
-      const hasJsonName = pin.metadata?.name?.endsWith('.json');
-      const isLessonType = pin.metadata?.keyvalues?.type === 'lesson';
-      return hasJsonName || isLessonType;
+    console.log("Pinata API response:", response.data);
+    console.log("Total pins found:", response.data.rows.length);
+
+    // Log all pins for debugging
+    response.data.rows.forEach((pin: any, index: number) => {
+      console.log(`Pin ${index}:`, {
+        hash: pin.ipfs_pin_hash,
+        name: pin.metadata?.name,
+        keyvalues: pin.metadata?.keyvalues,
+        size: pin.size,
+        timestamp: pin.timestamp
+      });
     });
+
+    // More lenient filtering - include all pins for now
+    const lessonPins = response.data.rows;
+    console.log("Using all pins as lessons:", lessonPins.length);
 
     // Retrieve each lesson's content
     const lessons: Lesson[] = [];
     for (const pin of lessonPins) {
       try {
+        console.log("Fetching lesson content for hash:", pin.ipfs_pin_hash);
         const lesson = await getLesson(pin.ipfs_pin_hash);
+        console.log("Retrieved lesson:", lesson);
         lessons.push({
           ...lesson,
           ipfsHash: pin.ipfs_pin_hash,
@@ -111,6 +126,7 @@ export async function getAllLessons(): Promise<Lesson[]> {
       }
     }
 
+    console.log("Total lessons retrieved:", lessons.length);
     return lessons;
   } catch (error) {
     console.error('Error retrieving all lessons from Pinata:', error);

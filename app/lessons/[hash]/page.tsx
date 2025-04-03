@@ -60,17 +60,22 @@ export default async function LessonPage({ params }: LessonPageProps) {
             </div>
           </div>
           
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            {lesson.content.split('\n').map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
-          
-          <div className="mt-12 pt-8 border-t">
-            <p className="text-sm text-muted-foreground">
-              IPFS Hash: {lesson.ipfsHash}
-            </p>
-          </div>
+          {lesson.notionUrl ? (
+            <div className="w-full h-[800px] border rounded-lg overflow-hidden">
+              <iframe 
+                src={lesson.notionUrl} 
+                className="w-full h-full border-0"
+                title={`Notion page for ${lesson.title}`}
+                allow="fullscreen"
+              />
+            </div>
+          ) : (
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              {lesson.content.split('\n').map((paragraph, index) => (
+                <p key={index}>{paragraph}</p>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     );

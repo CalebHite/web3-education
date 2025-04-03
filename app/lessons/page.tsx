@@ -77,6 +77,7 @@ export default function LessonsPage() {
   useEffect(() => {
     const fetchLessons = async () => {
       try {
+        console.log("Starting to fetch lessons...");
         setIsLoading(true);
         const fetchedLessons = await getAllLessons();
         
@@ -149,11 +150,10 @@ export default function LessonsPage() {
                   </span>
                   {lesson.title}
                 </CardTitle>
-                <CardDescription>{lesson.description}</CardDescription>
+                <CardDescription>{lesson.content}</CardDescription>
               </CardHeader>
-              <CardContent className="pt-6">
-                <p>{lesson.content.substring(0, 150)}...</p>
-                <p className="text-sm text-muted-foreground mt-2">By: {lesson.author}</p>
+              <CardContent className="">
+                <p className="text-sm text-muted-foreground">By: {lesson.author}</p>
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full">

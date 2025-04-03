@@ -36,7 +36,8 @@ export default function CreateLessonPage() {
     title: "",
     content: "",
     author: "",
-    icon: "BookOpen" // Default icon
+    icon: "BookOpen", // Default icon
+    notionUrl: "" // Notion page URL
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -146,19 +147,30 @@ export default function CreateLessonPage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="content">Content</Label>
+                <Label htmlFor="content">Description</Label>
                 <Textarea
                   id="content"
                   name="content"
                   value={formData.content}
                   onChange={handleChange}
-                  placeholder="Enter lesson content"
-                  className="min-h-[200px]"
-                  required
+                  placeholder="Enter short description of lesson"
+                  className="min-h-[100px]"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="notionUrl">Notion Page URL</Label>
+                <Input
+                  id="notionUrl"
+                  name="notionUrl"
+                  value={formData.notionUrl}
+                  onChange={handleChange}
+                  placeholder="https://your-notion-page-url.com"
+                  type="url"
                 />
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="mt-4">
               <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
                 {isSubmitting ? "Uploading..." : "Create Lesson"}
               </Button>
