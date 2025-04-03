@@ -7,7 +7,7 @@ export interface Lesson {
   content: string;
   author: string;
   icon?: string; // Icon name from lucide-react
-  notionUrl?: string; // URL to the Notion page
+  googleDocsUrl?: string; // URL to the Google Docs page
   createdAt?: Date;
   updatedAt?: Date;
   ipfsHash?: string;

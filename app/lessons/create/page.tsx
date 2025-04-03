@@ -37,7 +37,7 @@ export default function CreateLessonPage() {
     content: "",
     author: "",
     icon: "BookOpen", // Default icon
-    notionUrl: "" // Notion page URL
+    googleDocsUrl: "" // Google Docs URL
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -159,14 +159,15 @@ export default function CreateLessonPage() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="notionUrl">Notion Page URL</Label>
+                <Label htmlFor="googleDocsUrl">Google Docs URL</Label>
                 <Input
-                  id="notionUrl"
-                  name="notionUrl"
-                  value={formData.notionUrl}
+                  id="googleDocsUrl"
+                  name="googleDocsUrl"
+                  value={formData.googleDocsUrl}
                   onChange={handleChange}
-                  placeholder="https://your-notion-page-url.com"
+                  placeholder="https://docs.google.com/document/d/..."
                   type="url"
+                  required
                 />
               </div>
             </CardContent>
