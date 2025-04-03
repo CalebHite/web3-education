@@ -1,6 +1,7 @@
 // components/contract-builder/ContractPreview.tsx
 import { ContractFormData } from '@/types/contracts';
 import { useState } from 'react';
+import { Maximize2, Minimize2 } from "lucide-react";
 
 interface ContractPreviewProps {
   contractData: ContractFormData;
@@ -112,16 +113,16 @@ pragma solidity ^0.8.20;
         style={{ maxHeight: isExpanded ? '80vh' : 'auto' }}
       >
         <div 
-          className="flex justify-between items-center p-3 bg-gray-800 text-white cursor-pointer hover:bg-gray-700"
+          className="flex justify-between items-center p-3 bg-zinc-800 text-white cursor-pointer hover:bg-zinc-700"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <h2 className="text-sm font-semibold">Contract Preview</h2>
           <button className="text-white hover:text-gray-200 cursor-pointer">
-            {isExpanded ? '▼' : '▶'}
+            {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
         </div>
         {isExpanded && (
-          <div className="p-3 bg-gray-900">
+          <div className="p-3 bg-zinc-900">
             <pre className="font-mono text-xs text-gray-100 overflow-auto" style={{ maxHeight: 'calc(80vh - 40px)' }}>
               <code>{solidityCode}</code>
             </pre>

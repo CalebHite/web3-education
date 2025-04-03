@@ -1,7 +1,9 @@
 // app/contract-builder/page.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { ContractFormData } from '@/types/contracts';
 import ContractNameSection from '@/components/contract-builder/ContractNameSection';
 import VariablesSection from '@/components/contract-builder/VariablesSection';
@@ -9,6 +11,15 @@ import FunctionsSection from '@/components/contract-builder/FunctionsSection';
 import EventsSection from '@/components/contract-builder/EventsSection';
 import ContractPreview from '@/components/contract-builder/ContractPreview';
 import { VariableDefinition, FunctionDefinition, EventDefinition } from '@/types/contracts';
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 type SectionType = 'variable' | 'function' | 'event';
 
@@ -40,14 +51,6 @@ export default function ContractBuilder() {
     inherits: ['ERC20'],
   });
 
-  // Add state for section visibility
-  const [visibleSections, setVisibleSections] = useState<Record<SectionType, boolean>>({
-    variable: true,
-    function: true,
-    event: true,
-  });
-
-  // Add new states for deployment
   const [showDeployment, setShowDeployment] = useState(false);
   const [compiledContract, setCompiledContract] = useState<any>(null);
   const [network, setNetwork] = useState('sepolia');
@@ -56,39 +59,14 @@ export default function ContractBuilder() {
   const [deploymentResult, setDeploymentResult] = useState<any>(null);
   const [isDeploying, setIsDeploying] = useState(false);
 
-  const addVariable = () => {
-    const newVariable: VariableDefinition = {
-      name: `variable${contractData.variables.length + 1}`,
-      type: 'uint256',
-      visibility: 'private',
-      constant: false
-    };
-    updateContractData({ 
-      variables: [...contractData.variables, newVariable] 
-    });
-  };
-
-  const addEvent = () => {
-    const newEvent: EventDefinition = {
-      name: `Event${contractData.events.length + 1}`,
-      parameters: [
-        { name: 'value', type: 'uint256', indexed: false }
-      ]
-    };
-    updateContractData({ 
-      events: [...contractData.events, newEvent] 
-    });
-  };
-
   const updateContractData = (newData: Partial<ContractFormData>) => {
     setContractData(prev => ({ ...prev, ...newData }));
   };
 
-  // Remove the useState for sectionsList and make it a derived value
   const sectionsList: Section[] = [
     {
       id: 'variable',
-      title: 'Variables',
+      title: 'State Variables',
       component: (
         <VariablesSection 
           variables={contractData.variables} 
@@ -109,9 +87,7 @@ export default function ContractBuilder() {
         <FunctionsSection 
           functions={contractData.functions} 
           variables={contractData.variables}
-          events={contractData.events}
           onUpdate={(functions: FunctionDefinition[]) => updateContractData({ functions })} 
-          onEventUpdate={(events: EventDefinition[]) => updateContractData({ events })}
         />
       )
     },
@@ -129,12 +105,8 @@ export default function ContractBuilder() {
 
   const handleCompileAndDeploy = async () => {
     try {
-      // Generate Solidity contract code from contractData
       const solidityCode = generateSolidityCode(contractData);
-
-      console.log(solidityCode);
       
-      // Compile the contract using the Solidity compiler API
       const response = await fetch('/api/compile', {
         method: 'POST',
         headers: {
@@ -158,7 +130,6 @@ export default function ContractBuilder() {
         bytecode: compilationResult.bytecode,
       };
       
-      // Store compilation result
       localStorage.setItem('compiledContract', JSON.stringify(compiledContract));
       setCompiledContract(compiledContract);
       setShowDeployment(true);
@@ -169,7 +140,6 @@ export default function ContractBuilder() {
     }
   };
 
-  // Helper function to generate Solidity code from contract data
   const generateSolidityCode = (data: ContractFormData): string => {
     const inherits = data.inherits && data.inherits.length > 0 ? ` is ${data.inherits.join(', ')}` : '';
     
@@ -245,149 +215,130 @@ export default function ContractBuilder() {
     }
   };
 
-  const toggleSection = (sectionId: SectionType) => {
-    setVisibleSections(prev => ({
-      ...prev,
-      [sectionId]: !prev[sectionId]
-    }));
-  };
-
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-6">Smart Contract Builder</h1>
-      
+    <div className="container mx-auto px-4 py-12">
+      <Link href="/" className="flex items-center mb-12 hover:text-blue-500">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+      </Link>
+      <h1 className="mb-6 text-3xl font-bold tracking-tight">Smart Contract Builder</h1>
+
       <div className="max-w-4xl">
         {!showDeployment ? (
           // Contract Builder UI
-          <div className="space-y-4">
-            <ContractNameSection 
-              contractData={contractData}
-              onUpdate={(data) => updateContractData(data)} 
-            />
-            <div className="space-y-4">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Contract Name</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ContractNameSection 
+                  contractData={contractData}
+                  onUpdate={(data) => updateContractData(data)} 
+                />
+              </CardContent>
+            </Card>
+
+            <Accordion type="multiple" className="w-full">
               {sectionsList.map((section) => (
-                <div
-                  key={section.id}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200"
-                >
-                  <div 
-                    className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg cursor-pointer flex justify-between items-center"
-                    onClick={() => toggleSection(section.id)}
-                  >
-                    <h2 className="text-lg font-semibold">{section.title}</h2>
-                    <svg
-                      className={`w-5 h-5 transform transition-transform ${visibleSections[section.id] ? 'rotate-180' : ''}`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </div>
-                  <div className={`p-4 ${visibleSections[section.id] ? 'block' : 'hidden'}`}>
+                <AccordionItem key={section.id} value={section.id}>
+                  <AccordionTrigger className="bg-muted/50 cursor-pointer px-4 py-3 rounded-t-lg font-medium">
+                    {section.title}
+                  </AccordionTrigger>
+                  <AccordionContent className="p-4 border border-t-0 border-border rounded-b-lg bg-card">
                     {section.component}
-                  </div>
-                </div>
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
-            
-            <button 
-              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 cursor-pointer"
-              onClick={handleCompileAndDeploy}
-            >
+            </Accordion>
+
+            <Button className="w-full md:w-auto cursor-pointer" onClick={handleCompileAndDeploy}>
               Generate & Compile Contract
-            </button>
+            </Button>
 
             <ContractPreview contractData={contractData} />
           </div>
         ) : (
           // Deployment UI
-          <div className="space-y-4">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold">Deploy Contract: {contractData.name}</h2>
-              <button
-                onClick={() => setShowDeployment(false)}
-                className="text-gray-600 hover:text-gray-800 cursor-pointer"
-              >
-                ← Back to Editor
-              </button>
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <h2 className="text-2xl font-bold">Deploy Contract: {contractData.name}</h2>
+              <Button variant="ghost" onClick={() => setShowDeployment(false)} className="flex items-center gap-2">
+                <ArrowLeft className="h-4 w-4" /> Back to Editor
+              </Button>
             </div>
 
-            <div className="border rounded-lg p-6 bg-gray-50">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Network</label>
-                  <select
-                    className="w-full p-2 border rounded"
-                    value={network}
-                    onChange={(e) => setNetwork(e.target.value)}
-                  >
-                    <option value="sepolia">Sepolia (Testnet)</option>
-                    <option value="goerli">Goerli (Testnet)</option>
-                    <option value="local">Local (Hardhat)</option>
-                  </select>
+            <Card>
+              <CardContent className="pt-6 space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="network">Network</Label>
+                  <Select value={network} onValueChange={setNetwork}>
+                    <SelectTrigger id="network">
+                      <SelectValue placeholder="Select network" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sepolia">Sepolia (Testnet)</SelectItem>
+                      <SelectItem value="goerli">Goerli (Testnet)</SelectItem>
+                      <SelectItem value="local">Local (Hardhat)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">Private Key</label>
-                  <input
+                <div className="space-y-2">
+                  <Label htmlFor="privateKey">Private Key</Label>
+                  <Input
+                    id="privateKey"
                     type="password"
-                    className="w-full p-2 border rounded"
                     value={privateKey}
                     onChange={(e) => setPrivateKey(e.target.value)}
                     placeholder="Enter your private key"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Never share your private key. This is stored locally and not sent to our servers.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Never share your private key. This is stored locally and not sent to our servers.
+                  </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">Constructor Arguments (JSON array)</label>
-                  <textarea
-                    className="w-full p-2 border rounded font-mono h-32"
+                <div className="space-y-2">
+                  <Label htmlFor="constructorArgs">Constructor Arguments (JSON array)</Label>
+                  <Textarea
+                    id="constructorArgs"
+                    className="font-mono h-32"
                     value={constructorArgs}
                     onChange={(e) => setConstructorArgs(e.target.value)}
                     placeholder="Enter constructor arguments as a JSON array"
                   />
                 </div>
 
-                <button
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleDeploy}
-                  disabled={isDeploying || !privateKey}
-                >
-                  {isDeploying ? 'Deploying...' : 'Deploy Contract'}
-                </button>
+                <Button className="w-full" onClick={handleDeploy} disabled={isDeploying || !privateKey}>
+                  {isDeploying ? "Deploying..." : "Deploy Contract"}
+                </Button>
 
                 {deploymentResult && (
-                  <div className={`p-4 rounded-lg border ${
-                    deploymentResult.success ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'
-                  }`}>
-                    <h3 className="text-lg font-semibold mb-2">
-                      {deploymentResult.success ? 'Deployment Successful' : 'Deployment Failed'}
-                    </h3>
-                    {deploymentResult.success ? (
-                      <div>
-                        <p className="text-sm mb-2">Contract Address:</p>
-                        <code className="block bg-gray-100 p-2 rounded text-sm break-all">
-                          {deploymentResult.contractAddress}
-                        </code>
-                        <p className="text-sm mt-4">Transaction Hash:</p>
-                        <code className="block bg-gray-100 p-2 rounded text-sm break-all">
-                          {deploymentResult.transactionHash}
-                        </code>
-                      </div>
-                    ) : (
-                      <p className="text-sm">{deploymentResult.message}</p>
-                    )}
-                  </div>
+                  <Alert variant={deploymentResult.success ? "default" : "destructive"}>
+                    <AlertTitle>{deploymentResult.success ? "Deployment Successful" : "Deployment Failed"}</AlertTitle>
+                    <AlertDescription>
+                      {deploymentResult.success ? (
+                        <div className="space-y-4 mt-2">
+                          <div>
+                            <p className="text-sm font-medium mb-1">Contract Address:</p>
+                            <code className="block bg-muted p-2 rounded text-sm break-all">
+                              {deploymentResult.contractAddress}
+                            </code>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium mb-1">Transaction Hash:</p>
+                            <code className="block bg-muted p-2 rounded text-sm break-all">
+                              {deploymentResult.transactionHash}
+                            </code>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm">{deploymentResult.message}</p>
+                      )}
+                    </AlertDescription>
+                  </Alert>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         )}
       </div>

@@ -11,6 +11,9 @@ export default function Home() {
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">
           Kansas Blockchain Education
         </h1>
+        <div className="flex justify-center">
+          <img src="/kubi-rgb.png" className="w-60"></img>
+        </div>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl">
           Explore the world of blockchain technology and earn KUBIX tokens while learning
         </p>

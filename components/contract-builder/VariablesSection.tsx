@@ -107,7 +107,7 @@ export default function VariablesSection({ variables, onUpdate, onAddFunction, o
             </div>
             <button
               onClick={() => removeVariable(index)}
-              className="mt-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-sm cursor-pointer"
+              className="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm cursor-pointer"
             >
               Remove
             </button>

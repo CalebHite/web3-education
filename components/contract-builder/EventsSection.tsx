@@ -90,7 +90,7 @@ export default function EventsSection({ events, onUpdate }: EventsSectionProps) 
               <h4 className="text-sm font-medium text-gray-700">Parameters</h4>
               <button
                 onClick={() => addParameter(eventIndex)}
-                className="text-sm bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 cursor-pointer"
+                className="text-sm bg-zinc-700 text-white px-4 py-2 rounded hover:bg-green-600 cursor-pointer"
               >
                 Add Parameter
               </button>
