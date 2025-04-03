@@ -8,7 +8,6 @@ import VariablesSection from '@/components/contract-builder/VariablesSection';
 import FunctionsSection from '@/components/contract-builder/FunctionsSection';
 import EventsSection from '@/components/contract-builder/EventsSection';
 import ContractPreview from '@/components/contract-builder/ContractPreview';
-import CreateSectionForm from '@/components/contract-builder/CreateSectionForm';
 import { VariableDefinition, FunctionDefinition, EventDefinition } from '@/types/contracts';
 
 type SectionType = 'variable' | 'function' | 'event';
@@ -41,10 +40,6 @@ export default function ContractBuilder() {
     inherits: ['ERC20'],
   });
 
-  const [showCreateSection, setShowCreateSection] = useState(false);
-  const [selectedType, setSelectedType] = useState<SectionType>('variable');
-  const [showOptions, setShowOptions] = useState(false);
-
   // Add new states for deployment
   const [showDeployment, setShowDeployment] = useState(false);
   const [compiledContract, setCompiledContract] = useState<any>(null);
@@ -54,39 +49,28 @@ export default function ContractBuilder() {
   const [deploymentResult, setDeploymentResult] = useState<any>(null);
   const [isDeploying, setIsDeploying] = useState(false);
 
-  const addVariable = (newVariable: VariableDefinition) => {
+  const addVariable = () => {
+    const newVariable: VariableDefinition = {
+      name: `variable${contractData.variables.length + 1}`,
+      type: 'uint256',
+      visibility: 'private',
+      constant: false
+    };
     updateContractData({ 
       variables: [...contractData.variables, newVariable] 
     });
-    setShowCreateSection(false);
   };
 
-  const addFunction = (newFunction: FunctionDefinition) => {
-    updateContractData({ 
-      functions: [...contractData.functions, newFunction] 
-    });
-    setShowCreateSection(false);
-  };
-
-  const addEvent = (newEvent: EventDefinition) => {
+  const addEvent = () => {
+    const newEvent: EventDefinition = {
+      name: `Event${contractData.events.length + 1}`,
+      parameters: [
+        { name: 'value', type: 'uint256', indexed: false }
+      ]
+    };
     updateContractData({ 
       events: [...contractData.events, newEvent] 
     });
-    setShowCreateSection(false);
-  };
-
-  const handleCreate = (data: VariableDefinition | FunctionDefinition | EventDefinition) => {
-    switch (selectedType) {
-      case 'variable':
-        addVariable(data as VariableDefinition);
-        break;
-      case 'function':
-        addFunction(data as FunctionDefinition);
-        break;
-      case 'event':
-        addEvent(data as EventDefinition);
-        break;
-    }
   };
 
   const updateContractData = (newData: Partial<ContractFormData>) => {
@@ -117,7 +101,10 @@ export default function ContractBuilder() {
       component: (
         <FunctionsSection 
           functions={contractData.functions} 
+          variables={contractData.variables}
+          events={contractData.events}
           onUpdate={(functions: FunctionDefinition[]) => updateContractData({ functions })} 
+          onEventUpdate={(events: EventDefinition[]) => updateContractData({ events })}
         />
       )
     },
@@ -177,7 +164,7 @@ export default function ContractBuilder() {
 
   // Helper function to generate Solidity code from contract data
   const generateSolidityCode = (data: ContractFormData): string => {
-    const inherits = data.inherits?.length > 0 ? ` is ${data.inherits.join(', ')}` : '';
+    const inherits = data.inherits && data.inherits.length > 0 ? ` is ${data.inherits.join(', ')}` : '';
     
     const variables = data.variables.map(v => 
       `    ${v.visibility} ${v.type} ${v.name};`
@@ -263,71 +250,6 @@ export default function ContractBuilder() {
               contractData={contractData}
               onUpdate={(data) => updateContractData(data)} 
             />
-            <div className="space-y-2">
-              <div className="flex justify-end">
-                {showCreateSection ? (
-                  <button
-                    onClick={() => setShowCreateSection(false)}
-                    className="bg-gray-500 text-white px-3 py-1 rounded hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
-                ) : (
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowOptions(!showOptions)}
-                      className="w-12 h-12 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 flex items-center justify-center text-2xl transition-transform duration-200 hover:scale-110"
-                    >
-                      +
-                    </button>
-                    {showOptions && (
-                      <div className="absolute bottom-full right-0 mb-2 flex gap-2">
-                        <button
-                          onClick={() => {
-                            setSelectedType('variable');
-                            setShowCreateSection(true);
-                            setShowOptions(false);
-                          }}
-                          className="bg-white text-gray-800 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200 whitespace-nowrap"
-                        >
-                          Variable
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedType('function');
-                            setShowCreateSection(true);
-                            setShowOptions(false);
-                          }}
-                          className="bg-white text-gray-800 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200 whitespace-nowrap"
-                        >
-                          Function
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedType('event');
-                            setShowCreateSection(true);
-                            setShowOptions(false);
-                          }}
-                          className="bg-white text-gray-800 px-4 py-2 rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200 whitespace-nowrap"
-                        >
-                          Event
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {showCreateSection && (
-                <CreateSectionForm
-                  title={`Create New ${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}`}
-                  onSubmit={handleCreate}
-                  onCancel={() => setShowCreateSection(false)}
-                  type={selectedType}
-                />
-              )}
-            </div>
-
             <div className="space-y-4">
               {sectionsList.map((section) => (
                 <div

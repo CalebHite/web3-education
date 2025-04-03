@@ -1,7 +1,23 @@
 import { useState } from 'react';
 import { VariableDefinition, FunctionDefinition, EventDefinition } from '@/types/contracts';
 
+interface VariablesSectionProps {
+  variables: VariableDefinition[];
+  onUpdate: (variables: VariableDefinition[]) => void;
+  onAddFunction: (function_: FunctionDefinition) => void;
+  onAddEvent: (event: EventDefinition) => void;
+}
+
 export default function VariablesSection({ variables, onUpdate, onAddFunction, onAddEvent }: VariablesSectionProps) {
+  const addVariable = () => {
+    const newVariable: VariableDefinition = {
+      name: `variable${variables.length + 1}`,
+      type: 'uint256',
+      visibility: 'private',
+      constant: false
+    };
+    onUpdate([...variables, newVariable]);
+  };
 
   const updateVariable = (index: number, field: keyof VariableDefinition, value: any) => {
     const updatedVariables = [...variables];
@@ -19,6 +35,14 @@ export default function VariablesSection({ variables, onUpdate, onAddFunction, o
 
   return (
     <div>
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={addVariable}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Add Variable
+        </button>
+      </div>
       <div className="space-y-2">
         {variables.map((variable, index) => (
           <div key={index} className="bg-gray-50 p-3 rounded-lg shadow-sm">
