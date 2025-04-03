@@ -116,7 +116,7 @@ pragma solidity ^0.8.20;
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <h2 className="text-sm font-semibold">Contract Preview</h2>
-          <button className="text-white hover:text-gray-200">
+          <button className="text-white hover:text-gray-200 cursor-pointer">
             {isExpanded ? '▼' : '▶'}
           </button>
         </div>

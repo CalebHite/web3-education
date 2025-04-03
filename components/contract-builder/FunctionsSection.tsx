@@ -113,7 +113,7 @@ export default function FunctionsSection({ functions, variables, onUpdate }: Fun
       <div className="flex justify-end">
         <button
           onClick={() => setShowAddFunction(true)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer"
         >
           Add Function
         </button>
@@ -200,14 +200,14 @@ export default function FunctionsSection({ functions, variables, onUpdate }: Fun
                   setSelectedTemplate('');
                   setSelectedVariables({});
                 }}
-                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={addFunction}
                 disabled={!selectedTemplate}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Add Function
               </button>
@@ -223,7 +223,7 @@ export default function FunctionsSection({ functions, variables, onUpdate }: Fun
               <h3 className="text-lg font-medium">{func.name}</h3>
               <button
                 onClick={() => removeFunction(index)}
-                className="text-red-500 hover:text-red-700"
+                className="text-red-500 hover:text-red-700 cursor-pointer"
               >
                 ✕
               </button>

@@ -38,7 +38,7 @@ export default function VariablesSection({ variables, onUpdate, onAddFunction, o
       <div className="flex justify-end mb-4">
         <button
           onClick={addVariable}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer"
         >
           Add Variable
         </button>
@@ -102,12 +102,12 @@ export default function VariablesSection({ variables, onUpdate, onAddFunction, o
                 type="text"
                 value={variable.defaultValue || ''}
                 onChange={(e) => updateVariable(index, 'defaultValue', e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                className="mt-1 block w-full rounded-md border-gray-300 w-1/2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
             <button
               onClick={() => removeVariable(index)}
-              className="mt-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-sm"
+              className="mt-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-sm cursor-pointer"
             >
               Remove
             </button>

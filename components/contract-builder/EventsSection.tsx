@@ -60,7 +60,7 @@ export default function EventsSection({ events, onUpdate }: EventsSectionProps) 
       <div className="flex justify-end">
         <button
           onClick={addEvent}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 cursor-pointer"
         >
           Add Event
         </button>
@@ -79,7 +79,7 @@ export default function EventsSection({ events, onUpdate }: EventsSectionProps) 
             </div>
             <button
               onClick={() => removeEvent(eventIndex)}
-              className="ml-4 text-red-500 hover:text-red-700"
+              className="ml-4 text-red-500 hover:text-red-700 cursor-pointer"
             >
               ✕
             </button>
@@ -90,7 +90,7 @@ export default function EventsSection({ events, onUpdate }: EventsSectionProps) 
               <h4 className="text-sm font-medium text-gray-700">Parameters</h4>
               <button
                 onClick={() => addParameter(eventIndex)}
-                className="text-sm bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                className="text-sm bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 cursor-pointer"
               >
                 Add Parameter
               </button>
@@ -137,7 +137,7 @@ export default function EventsSection({ events, onUpdate }: EventsSectionProps) 
                 </div>
                 <button
                   onClick={() => removeParameter(eventIndex, paramIndex)}
-                  className="mt-2 text-sm text-red-500 hover:text-red-700"
+                  className="mt-2 text-sm text-red-500 hover:text-red-700 cursor-pointer"
                 >
                   Remove Parameter
                 </button>

@@ -40,6 +40,13 @@ export default function ContractBuilder() {
     inherits: ['ERC20'],
   });
 
+  // Add state for section visibility
+  const [visibleSections, setVisibleSections] = useState<Record<SectionType, boolean>>({
+    variable: true,
+    function: true,
+    event: true,
+  });
+
   // Add new states for deployment
   const [showDeployment, setShowDeployment] = useState(false);
   const [compiledContract, setCompiledContract] = useState<any>(null);
@@ -81,7 +88,7 @@ export default function ContractBuilder() {
   const sectionsList: Section[] = [
     {
       id: 'variable',
-      title: 'Contract Variables',
+      title: 'Variables',
       component: (
         <VariablesSection 
           variables={contractData.variables} 
@@ -97,7 +104,7 @@ export default function ContractBuilder() {
     },
     {
       id: 'function',
-      title: 'Contract Functions',
+      title: 'Functions',
       component: (
         <FunctionsSection 
           functions={contractData.functions} 
@@ -110,7 +117,7 @@ export default function ContractBuilder() {
     },
     {
       id: 'event',
-      title: 'Contract Events',
+      title: 'Events',
       component: (
         <EventsSection 
           events={contractData.events} 
@@ -238,8 +245,15 @@ export default function ContractBuilder() {
     }
   };
 
+  const toggleSection = (sectionId: SectionType) => {
+    setVisibleSections(prev => ({
+      ...prev,
+      [sectionId]: !prev[sectionId]
+    }));
+  };
+
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">Smart Contract Builder</h1>
       
       <div className="max-w-4xl">
@@ -256,10 +270,26 @@ export default function ContractBuilder() {
                   key={section.id}
                   className="bg-white rounded-lg shadow-sm border border-gray-200"
                 >
-                  <div className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                  <div 
+                    className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg cursor-pointer flex justify-between items-center"
+                    onClick={() => toggleSection(section.id)}
+                  >
                     <h2 className="text-lg font-semibold">{section.title}</h2>
+                    <svg
+                      className={`w-5 h-5 transform transition-transform ${visibleSections[section.id] ? 'rotate-180' : ''}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
                   </div>
-                  <div className="p-4">
+                  <div className={`p-4 ${visibleSections[section.id] ? 'block' : 'hidden'}`}>
                     {section.component}
                   </div>
                 </div>
@@ -282,7 +312,7 @@ export default function ContractBuilder() {
               <h2 className="text-xl font-bold">Deploy Contract: {contractData.name}</h2>
               <button
                 onClick={() => setShowDeployment(false)}
-                className="text-gray-600 hover:text-gray-800"
+                className="text-gray-600 hover:text-gray-800 cursor-pointer"
               >
                 ← Back to Editor
               </button>
