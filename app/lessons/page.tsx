@@ -111,11 +111,6 @@ export default function LessonsPage() {
         <Link href="/" className="flex items-center hover:text-blue-500">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
         </Link>
-        <Button asChild>
-          <Link href="/lessons/create">
-            <Plus className="mr-2 h-4 w-4" /> Create Lesson
-          </Link>
-        </Button>
       </div>
       
       <div className="mb-12 text-center">

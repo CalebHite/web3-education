@@ -37,8 +37,11 @@ export default function CreateLessonPage() {
     content: "",
     author: "",
     icon: "BookOpen", // Default icon
-    googleDocsUrl: "" // Google Docs URL
+    googleDocsUrl: "", // Google Docs URL
+    authKey: "" // Authentication key
   });
+
+  const VALID_AUTH_KEY = process.env.NEXT_PUBLIC_AUTH_KEY; // The required authentication key
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -51,6 +54,13 @@ export default function CreateLessonPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate authentication key
+    if (formData.authKey !== VALID_AUTH_KEY) {
+      alert("Invalid authentication key. Please enter the correct key to create a lesson.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -167,6 +177,19 @@ export default function CreateLessonPage() {
                   onChange={handleChange}
                   placeholder="https://docs.google.com/document/d/..."
                   type="url"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="authKey">Authentication Key</Label>
+                <Input
+                  id="authKey"
+                  name="authKey"  
+                  value={formData.authKey}
+                  onChange={handleChange}
+                  placeholder="Enter authentication key"
+                  type="password"
                   required
                 />
               </div>
