@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, Code, Coins, Lock, Network, FileText, Book, GraduationCap, Lightbulb, Rocket, Shield, Terminal, Zap, Brain } from "lucide-react";
+import { ArrowLeft, BookOpen, Code, Coins, Lock, Network, FileText, Book, GraduationCap, Lightbulb, Rocket, Shield, Terminal, Zap } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../../../components/ui/button";
 import { getLesson } from "../../../app/pinata";
@@ -139,8 +139,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Lessons
           </Link>
           <Link href={`/lessons/${hash}/study`} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            <Brain className="h-4 w-4" />
-            Study
+            <p className="text-xl font-semibold">Quiz Me</p>
           </Link>
         </div>
         
