@@ -130,7 +130,7 @@ export default function StudyPage({ params }: StudyPageProps) {
                 className={`mt-4 px-4 py-2 rounded-md transition-colors ${
                   selectedAnswers[index] === -1 || answeredQuestions[index]
                     ? 'bg-white text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                    : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
                 }`}
               >
                 {answeredQuestions[index] ? 'Answered' : 'Submit Answer'}
