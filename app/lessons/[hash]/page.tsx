@@ -22,8 +22,6 @@ const iconMap = {
   Zap
 };
 
-// Removed the LessonPageProps interface that was causing problems
-
 // Function to extract document ID from Google Docs URL
 function extractDocumentId(url: string): string | null {
   // Regex to match Google Docs URL patterns and extract the document ID
@@ -198,14 +196,9 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
   return html;
 }
 
-// Updated component parameters to fix the type error
-export default async function LessonPage({ 
-  params,
-  searchParams 
-}: { 
-  params: { hash: string },
-  searchParams?: Record<string, string | string[] | undefined>
-}) {
+// Simplified approach: don't use PageProps constraint at all
+// Instead, use the direct type for the component parameters
+export default async function LessonPage({ params }: { params: { hash: string } }) {
   const { hash } = params;
   
   try {
