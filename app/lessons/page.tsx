@@ -90,8 +90,8 @@ export default function LessonsPage() {
             ...lesson,
             iconElement: getLessonIcon(lesson.icon),
             description: lesson.content.substring(0, 100) + "...",
-            path: `/lessons/units/${lesson.unit}/${lesson.ipfsHash}`,
-            unitPath: `/lessons/units/${lesson.unit}`,
+            path: `/lessons/${lesson.ipfsHash}`,
+            unitPath: `/lessons`,
             ...styles
           };
         });
