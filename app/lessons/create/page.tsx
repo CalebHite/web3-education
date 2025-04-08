@@ -42,6 +42,7 @@ export default function CreateLessonPage() {
     unit: "" // Unit selection
   });
   const [createNewUnit, setCreateNewUnit] = useState(false);
+  const [error, setError] = useState("");
 
   const VALID_AUTH_KEY = process.env.NEXT_PUBLIC_AUTH_KEY; // The required authentication key
   const [units, setUnits] = useState<string[]>(["Blockchain Basics", "Smart Contracts", "Web3 Development"]); // Prefilled with example units
@@ -71,18 +72,15 @@ export default function CreateLessonPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!formData.unit) {
+      setError("Please select a unit before creating a lesson.");
+      return;
+    }
     // Validate authentication key
     if (formData.authKey !== VALID_AUTH_KEY) {
       alert("Invalid authentication key. Please enter the correct key to create a lesson.");
-      return;
-    }
-
-    // Validate unit field
-    if (!formData.unit) {
-      alert("Please select or create a unit for this lesson.");
       return;
     }
 
@@ -112,16 +110,22 @@ export default function CreateLessonPage() {
 
   return (
     <main className="container mx-auto px-8 py-4 md:py-24">
-      <Link href="/lessons" className="flex items-center mb-12 hover:text-blue-500">
-        <ArrowLeft className="mr-2 h-4 w-4" /> Back to Lessons
-      </Link>
-      
+      <div className="flex justify-between items-center mb-12">
+        <Link href="/" className="flex items-center hover:text-blue-500">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
+        </Link>
+      </div>
+      {error && (
+        <div className="text-center py-2 text-red-500">
+          <p className="text-lg">{error}</p>
+        </div>
+      )}
       <div className="mb-12 text-center">
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">
-          Create New Lesson
+          Create a New Lesson
         </h1>
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl">
-          Add a new lesson to our blockchain curriculum
+          Fill out the form below to add a new lesson to the curriculum.
         </p>
       </div>
 

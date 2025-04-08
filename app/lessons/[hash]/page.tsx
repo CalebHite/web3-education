@@ -36,45 +36,168 @@ function extractDocumentId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-// Function to convert Google Docs content to HTML
 function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
-  let html = '';
-  
   if (!document.body?.content) {
-    return html;
+    return '';
   }
   
-  // Process each structural element
+  // Step 1: Reconstruct the full document content
+  let fullContent = '';
+  let paragraphBreaks: number[] = [];
+  let currentPosition = 0;
+  
   document.body.content.forEach(element => {
     if (element.paragraph) {
-      html += '<p>';
-      
-      // Process each text run in the paragraph
       element.paragraph.elements?.forEach(textElement => {
         if (textElement.textRun) {
           const text = textElement.textRun.content || '';
-          const textStyle = textElement.textRun.textStyle || {};
-          
-          // Apply basic styling
-          let styledText = text;
-          if (textStyle.bold) styledText = `<strong>${styledText}</strong>`;
-          if (textStyle.italic) styledText = `<em>${styledText}</em>`;
-          if (textStyle.underline) styledText = `<u>${styledText}</u>`;
-          
-          html += styledText;
+          fullContent += text;
+          currentPosition += text.length;
         }
       });
-      
-      html += '</p>';
-    } else if (element.table) {
-      // Handle tables (simplified)
-      html += '<table class="border-collapse border my-4">';
-      // Table processing would go here
-      html += '</table>';
-    } else if (element.sectionBreak) {
-      html += '<hr class="my-4">';
+      // Mark the end of this paragraph
+      paragraphBreaks.push(currentPosition);
     }
   });
+  
+  // Step 2: Pre-process special formatting blocks
+  interface SpecialBlock {
+    start: number;
+    end: number;
+    type: 'heading' | 'subheading' | 'hr' | 'code' | 'link';
+    content: string;
+    originalText: string;
+  }
+  
+  const specialBlocks: SpecialBlock[] = [];
+  
+  // Regexes for detecting special blocks
+  const headingRegex = /{{h}}(.*?){{\/h}}/g;
+  const subheadingRegex = /{{sh}}(.*?){{\/sh}}/g;
+  const hrRegex = /{{hr}}/g;
+  const codeStartRegex = /{{code}}/g;
+  const codeEndRegex = /{{\/code}}/g;
+  const linkRegex = /{{a}}(.*?)\|(.*?){{\/a}}/g;
+  
+  // Find and process all special blocks
+  let match;
+  
+  // Process headings
+  while ((match = headingRegex.exec(fullContent)) !== null) {
+    specialBlocks.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      type: 'heading',
+      content: match[1],
+      originalText: match[0]
+    });
+  }
+  
+  // Process subheadings
+  while ((match = subheadingRegex.exec(fullContent)) !== null) {
+    specialBlocks.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      type: 'subheading',
+      content: match[1],
+      originalText: match[0]
+    });
+  }
+  
+  // Process horizontal rules
+  while ((match = hrRegex.exec(fullContent)) !== null) {
+    specialBlocks.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      type: 'hr',
+      content: '',
+      originalText: match[0]
+    });
+  }
+  
+  // Process code blocks
+  while ((match = codeStartRegex.exec(fullContent)) !== null) {
+    codeEndRegex.lastIndex = match.index;
+    const endMatch = codeEndRegex.exec(fullContent);
+    
+    if (endMatch) {
+      const codeContent = fullContent.substring(
+        match.index + match[0].length,
+        endMatch.index
+      ).trim();
+      
+      specialBlocks.push({
+        start: match.index,
+        end: endMatch.index + endMatch[0].length,
+        type: 'code',
+        content: codeContent,
+        originalText: fullContent.substring(match.index, endMatch.index + endMatch[0].length)
+      });
+    }
+  }
+  
+  // Process links
+  while ((match = linkRegex.exec(fullContent)) !== null) {
+    specialBlocks.push({
+      start: match.index,
+      end: match.index + match[0].length,
+      type: 'link',
+      content: JSON.stringify({ url: match[1], text: match[2] }),
+      originalText: match[0]
+    });
+  }
+  
+  // Sort blocks by start position
+  specialBlocks.sort((a, b) => a.start - b.start);
+  
+  // Step 3: Generate HTML
+  let html = '';
+  let lastPosition = 0;
+  
+  for (let i = 0; i <= paragraphBreaks.length; i++) {
+    const paragraphEnd = i < paragraphBreaks.length ? paragraphBreaks[i] : fullContent.length;
+    let paragraphContent = fullContent.substring(lastPosition, paragraphEnd);
+    let skipParagraphWrapper = false;
+    
+    // Process special blocks in this paragraph
+    const blocksInParagraph = specialBlocks.filter(block => 
+      (block.start >= lastPosition && block.start < paragraphEnd) ||
+      (block.end > lastPosition && block.end <= paragraphEnd) ||
+      (block.start < lastPosition && block.end > paragraphEnd)
+    );
+    
+    for (const block of blocksInParagraph) {
+      console.log(block.content);
+      if (block.type === 'code') {
+        const codeHtml = `<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4"><code class="text-sm">${block.content}</code></pre>`;
+        paragraphContent = paragraphContent.replace(block.originalText, codeHtml);
+        skipParagraphWrapper = true;
+      } else if (block.type === 'link') {
+        try {
+          const linkData = JSON.parse(block.content);
+          const linkHtml = `<a href="${linkData.url}" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">${linkData.text}</a>`;
+          paragraphContent = paragraphContent.replace(block.originalText, linkHtml);
+        } catch (e) {
+          console.error('Error processing link:', e);
+        }
+      } else if (block.type === 'heading') {
+        html += `<h2 class="text-3xl font-bold my-6">${block.content}</h2>`;
+        skipParagraphWrapper = true;
+      } else if (block.type === 'subheading') {
+        html += `<h3 class="text-2xl font-semibold my-4">${block.content}</h3>`;
+        skipParagraphWrapper = true;
+      } else if (block.type === 'hr') {
+        html += `<hr class="my-8 border-t-2 border-gray-300">`;
+        skipParagraphWrapper = true;
+      }
+    }
+    
+    if (!skipParagraphWrapper && paragraphContent.trim()) {
+      html += `<p class="mb-4">${paragraphContent}</p>`;
+    }
+    
+    lastPosition = paragraphEnd;
+  }
   
   return html;
 }
