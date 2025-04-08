@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, BookOpen, Code, Coins, Lock, Network, Plus, FileText, Book, GraduationCap, Lightbulb, Rocket, Shield, Terminal, Zap } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../../../components/ui/button";
@@ -38,10 +38,19 @@ export default function CreateLessonPage() {
     author: "",
     icon: "BookOpen", // Default icon
     googleDocsUrl: "", // Google Docs URL
-    authKey: "" // Authentication key
+    authKey: "", // Authentication key
+    unit: "" // Unit selection
   });
+  const [createNewUnit, setCreateNewUnit] = useState(false);
 
   const VALID_AUTH_KEY = process.env.NEXT_PUBLIC_AUTH_KEY; // The required authentication key
+  const [units, setUnits] = useState<string[]>(["Blockchain Basics", "Smart Contracts", "Web3 Development"]); // Prefilled with example units
+
+  // Fetch existing units
+  useEffect(() => {
+    // Replace with actual API call to fetch units
+    // For example: fetchUnits().then(data => setUnits(data));
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -50,6 +59,16 @@ export default function CreateLessonPage() {
 
   const handleIconChange = (value: string) => {
     setFormData((prev) => ({ ...prev, icon: value }));
+  };
+
+  const handleUnitChange = (value: string) => {
+    if (value === "create-new") {
+      setCreateNewUnit(true);
+      setFormData((prev) => ({ ...prev, unit: "" }));
+    } else {
+      setCreateNewUnit(false);
+      setFormData((prev) => ({ ...prev, unit: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -61,11 +80,21 @@ export default function CreateLessonPage() {
       return;
     }
 
+    // Validate unit field
+    if (!formData.unit) {
+      alert("Please select or create a unit for this lesson.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      const finalFormData = {
+        ...formData,
+      };
+
       // Upload lesson to Pinata
-      const uploadedLesson = await uploadLesson(formData);
+      const uploadedLesson = await uploadLesson(finalFormData);
       console.log("Lesson uploaded successfully:", uploadedLesson);
       
       // Redirect to lessons page
@@ -193,10 +222,57 @@ export default function CreateLessonPage() {
                   required
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="unit">Unit</Label>
+                {!createNewUnit ? (
+                  <Select value={formData.unit} onValueChange={handleUnitChange}>
+                    <SelectTrigger className="w-full cursor-pointer">
+                      <SelectValue placeholder="Select a unit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {units.map((unit) => (
+                        <SelectItem key={unit} value={unit} className="cursor-pointer">
+                          {unit}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="create-new" className="cursor-pointer">
+                        <div className="flex items-center text-blue-500">
+                          <Plus className="mr-2 h-4 w-4" />
+                          Create New Unit
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="space-y-2">
+                    <Input
+                      id="unit"
+                      name="unit"
+                      value={formData.unit}
+                      onChange={handleChange}
+                      placeholder="Enter new unit name"
+                      required
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full mb-2"
+                      onClick={() => setCreateNewUnit(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+              </div>
             </CardContent>
-            <CardFooter className="mt-4">
-              <Button type="submit" className="w-full cursor-pointer" disabled={isSubmitting}>
-                {isSubmitting ? "Uploading..." : "Create Lesson"}
+            <CardFooter>
+              <Button 
+                type="submit" 
+                className="w-full cursor-pointer" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Creating Lesson..." : "Create Lesson"}
               </Button>
             </CardFooter>
           </form>
@@ -204,4 +280,4 @@ export default function CreateLessonPage() {
       </div>
     </main>
   );
-} 
+}

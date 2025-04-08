@@ -149,6 +149,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
               <IconComponent className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               {lesson.title}
             </h1>
+            <p>{lesson.unit}</p>
             <div className="flex items-center text-muted-foreground">
               <p>By: {lesson.author}</p>
               {lesson.createdAt && (

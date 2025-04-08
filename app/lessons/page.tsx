@@ -18,6 +18,7 @@ type BaseLesson = {
   ipfsHash?: string
   createdAt?: Date
   updatedAt?: Date
+  unit?: string
 }
 
 // Define the UI-enhanced lesson type
@@ -29,6 +30,7 @@ type EnhancedLesson = BaseLesson & {
   iconColor?: string
   iconDarkColor?: string
   path?: string
+  unitPath?: string
 }
 
 // Map of icon names to components
@@ -88,7 +90,8 @@ export default function LessonsPage() {
             ...lesson,
             iconElement: getLessonIcon(lesson.icon),
             description: lesson.content.substring(0, 100) + "...",
-            path: `/lessons/${lesson.ipfsHash}`,
+            path: `/lessons/units/${lesson.unit}/${lesson.ipfsHash}`,
+            unitPath: `/lessons/units/${lesson.unit}`,
             ...styles
           };
         });
@@ -145,6 +148,9 @@ export default function LessonsPage() {
                   </span>
                   {lesson.title}
                 </CardTitle>
+                {lesson.unit && (
+                  <p className="text-sm text-muted-foreground font-semibold">{lesson.unit}</p>
+                )}
                 <CardDescription>{lesson.content}</CardDescription>
               </CardHeader>
               <CardContent className="">

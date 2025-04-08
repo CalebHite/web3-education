@@ -11,6 +11,7 @@ export interface Lesson {
   createdAt?: Date;
   updatedAt?: Date;
   ipfsHash?: string;
+  unit?: string; // Add unit property
 }
 
 // Pinata API configuration
@@ -33,20 +34,32 @@ const pinataApi = axios.create({
  */
 export async function uploadLesson(lesson: Lesson): Promise<Lesson> {
   try {
+    // Ensure unit is defined
+    const unit = lesson.unit || 'default-unit';
+    
     // Add timestamps if not provided
     const lessonToUpload = {
       ...lesson,
+      unit: unit, // Ensure unit is included in the lesson content
       createdAt: lesson.createdAt || new Date(),
       updatedAt: new Date(),
     };
 
-    // Upload to Pinata
+    // Upload to Pinata with explicit unit metadata
     const response = await pinataApi.post('/pinning/pinJSONToIPFS', {
       pinataContent: lessonToUpload,
       pinataOptions: {
         cidVersion: 0,
       },
+      pinataMetadata: {
+        name: lesson.title,
+        keyvalues: {
+          unit: unit, // Explicitly set unit in metadata
+        },
+      },
     });
+
+    console.log(`Lesson "${lesson.title}" uploaded with unit "${unit}" and hash: ${response.data.IpfsHash}`);
 
     // Return the lesson with the IPFS hash
     return {
@@ -80,53 +93,52 @@ export async function getLesson(ipfsHash: string): Promise<Lesson> {
  * Retrieve all lesson objects from Pinata
  * @returns Array of lesson objects with their IPFS hashes
  */
-export async function getAllLessons(): Promise<Lesson[]> {
+export async function getAllLessons(unitFilter?: string): Promise<Lesson[]> {
   try {
     console.log("Fetching lessons from Pinata...");
+    
     // Get all pinned items from Pinata
     const response = await pinataApi.get('/data/pinList', {
       params: {
         status: 'pinned',
-        pageLimit: 1000, // Adjust as needed
+        pageLimit: 1000,
+        metadata: unitFilter ? JSON.stringify({
+          keyvalues: {
+            unit: {
+              value: unitFilter,
+              op: 'eq'
+            }
+          }
+        }) : undefined
       },
     });
 
-    console.log("Pinata API response:", response.data);
-    console.log("Total pins found:", response.data.rows.length);
-
-    // Log all pins for debugging
-    response.data.rows.forEach((pin: any, index: number) => {
-      console.log(`Pin ${index}:`, {
-        hash: pin.ipfs_pin_hash,
-        name: pin.metadata?.name,
-        keyvalues: pin.metadata?.keyvalues,
-        size: pin.size,
-        timestamp: pin.timestamp
-      });
-    });
-
-    // More lenient filtering - include all pins for now
-    const lessonPins = response.data.rows;
-    console.log("Using all pins as lessons:", lessonPins.length);
+    console.log(`Total pins found: ${response.data.rows.length}`);
 
     // Retrieve each lesson's content
     const lessons: Lesson[] = [];
-    for (const pin of lessonPins) {
+    for (const pin of response.data.rows) {
       try {
-        console.log("Fetching lesson content for hash:", pin.ipfs_pin_hash);
-        const lesson = await getLesson(pin.ipfs_pin_hash);
-        console.log("Retrieved lesson:", lesson);
+        const lessonData = await getLesson(pin.ipfs_pin_hash);
+        
+        // Extract unit from metadata or use from lesson content with fallback
+        const unit = pin.metadata?.keyvalues?.unit || 
+                     lessonData.unit || 
+                     '';
+        
         lessons.push({
-          ...lesson,
+          ...lessonData,
           ipfsHash: pin.ipfs_pin_hash,
+          unit: unit
         });
+        
+        console.log(`Retrieved lesson: ${lessonData.title} (Unit: ${unit})`);
       } catch (error) {
         console.error(`Error retrieving lesson with hash ${pin.ipfs_pin_hash}:`, error);
-        // Continue with other lessons even if one fails
       }
     }
 
-    console.log("Total lessons retrieved:", lessons.length);
+    console.log(`Successfully retrieved ${lessons.length} lessons`);
     return lessons;
   } catch (error) {
     console.error('Error retrieving all lessons from Pinata:', error);
