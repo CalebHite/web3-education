@@ -71,6 +71,17 @@ const getLessonStyles = (index: number) => {
   return styles[index % styles.length];
 };
 
+const groupLessonsByUnit = (lessons: EnhancedLesson[]) => {
+  return lessons.reduce((acc, lesson) => {
+    const unit = lesson.unit || "Uncategorized";
+    if (!acc[unit]) {
+      acc[unit] = [];
+    }
+    acc[unit].push(lesson);
+    return acc;
+  }, {} as Record<string, EnhancedLesson[]>);
+};
+
 export default function LessonsPage() {
   const [lessons, setLessons] = useState<EnhancedLesson[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -95,6 +106,8 @@ export default function LessonsPage() {
             ...styles
           };
         });
+        
+        const groupedLessons = groupLessonsByUnit(enhancedLessons);
         
         setLessons(enhancedLessons);
       } catch (err) {
@@ -138,34 +151,39 @@ export default function LessonsPage() {
           <p className="text-lg">No lessons found...</p>
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {lessons.map((lesson) => (
-            <Card key={lesson.ipfsHash} className="overflow-hidden transition-all hover:shadow-lg">
-              <CardHeader className={`bg-gradient-to-r ${lesson.gradientFrom} ${lesson.gradientTo} dark:${lesson.gradientFrom?.replace('50', '950/50')} dark:${lesson.gradientTo?.replace('50', '950/50')}`}>
-                <CardTitle className="flex items-center gap-2">
-                  <span className={`${lesson.iconColor} ${lesson.iconDarkColor}`}>
-                    {lesson.iconElement}
-                  </span>
-                  {lesson.title}
-                </CardTitle>
-                {lesson.unit && (
-                  <p className="text-sm text-muted-foreground font-semibold">{lesson.unit}</p>
-                )}
-                <CardDescription>{lesson.content}</CardDescription>
-              </CardHeader>
-              <CardContent className="">
-                <p className="text-sm text-muted-foreground">By: {lesson.author}</p>
-              </CardContent>
-              <CardFooter>
-                <Button asChild className="w-full">
-                  <Link href={lesson.path || "#"}>
-                    Start Learning <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        Object.entries(groupLessonsByUnit(lessons)).map(([unit, lessons]) => (
+          <div key={unit} className="mb-12">
+            <h2 className="mb-4 text-2xl font-bold">{unit}</h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {lessons.map((lesson) => (
+                <Card key={lesson.ipfsHash} className="overflow-hidden transition-all hover:shadow-lg">
+                  <CardHeader className={`bg-gradient-to-r ${lesson.gradientFrom} ${lesson.gradientTo} dark:${lesson.gradientFrom?.replace('50', '950/50')} dark:${lesson.gradientTo?.replace('50', '950/50')}`}>
+                    <CardTitle className="flex items-center gap-2">
+                      <span className={`${lesson.iconColor} ${lesson.iconDarkColor}`}>
+                        {lesson.iconElement}
+                      </span>
+                      {lesson.title}
+                    </CardTitle>
+                    {lesson.unit && (
+                      <p className="text-sm text-muted-foreground font-semibold">{lesson.unit}</p>
+                    )}
+                    <CardDescription>{lesson.content}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="">
+                    <p className="text-sm text-muted-foreground">By: {lesson.author}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button asChild className="w-full">
+                      <Link href={lesson.path || "#"}>
+                        Start Learning <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+        ))
       )}
     </main>
   )
