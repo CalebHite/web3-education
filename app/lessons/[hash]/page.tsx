@@ -22,12 +22,7 @@ const iconMap = {
   Zap
 };
 
-interface LessonPageProps {
-  params: {
-    hash: string;
-  };
-  searchParams?: { [key: string]: string | string[] | undefined };
-}
+// Removed the LessonPageProps interface that was causing problems
 
 // Function to extract document ID from Google Docs URL
 function extractDocumentId(url: string): string | null {
@@ -203,7 +198,14 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
   return html;
 }
 
-export default async function LessonPage({ params }: LessonPageProps) {
+// Updated component parameters to fix the type error
+export default async function LessonPage({ 
+  params,
+  searchParams 
+}: { 
+  params: { hash: string },
+  searchParams?: Record<string, string | string[] | undefined>
+}) {
   const { hash } = params;
   
   try {
