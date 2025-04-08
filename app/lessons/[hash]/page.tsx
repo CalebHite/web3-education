@@ -23,9 +23,10 @@ const iconMap = {
 };
 
 interface LessonPageProps {
-  params: {
+  params: Promise<{
     hash: string;
-  };
+  }>;
+  searchParams?: { [key: string]: string | string[] | undefined };
 }
 
 // Function to extract document ID from Google Docs URL
@@ -203,7 +204,7 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
-  const { hash } = params;
+  const { hash } = await params;
   
   try {
     const lesson = await getLesson(hash);
