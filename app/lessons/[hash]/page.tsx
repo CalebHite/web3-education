@@ -23,9 +23,9 @@ const iconMap = {
 };
 
 interface LessonPageProps {
-  params: Promise<{
+  params: {
     hash: string;
-  }>;
+  };
   searchParams?: { [key: string]: string | string[] | undefined };
 }
 
@@ -204,7 +204,7 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
-  const { hash } = await params;
+  const { hash } = params;
   
   try {
     const lesson = await getLesson(hash);
