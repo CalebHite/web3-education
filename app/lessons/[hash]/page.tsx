@@ -22,6 +22,16 @@ const iconMap = {
   Zap
 };
 
+interface Lesson {
+  title: string;
+  unit: string;
+  author: string;
+  createdAt?: string;
+  content: string;
+  icon?: string;
+  googleDocsUrl?: string;
+}
+
 // Function to extract document ID from Google Docs URL
 function extractDocumentId(url: string): string | null {
   // Regex to match Google Docs URL patterns and extract the document ID
@@ -196,13 +206,17 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
   return html;
 }
 
-// Simplified approach: don't use PageProps constraint at all
-// Instead, use the direct type for the component parameters
-export default async function LessonPage({ params }: { params: { hash: string } }) {
+export default async function LessonPage({ 
+  params,
+  searchParams 
+}: { 
+  params: { hash: string },
+  searchParams?: Record<string, string | string[] | undefined>
+}) {
   const { hash } = params;
   
   try {
-    const lesson = await getLesson(hash);
+    const lesson = await getLesson(hash) as Lesson;
     
     // Get the icon component based on the lesson's icon name
     const IconComponent = lesson.icon && lesson.icon in iconMap 
@@ -220,10 +234,7 @@ export default async function LessonPage({ params }: { params: { hash: string } 
           ? JSON.parse(process.env.NEXT_PUBLIC_GOOGLE_CREDENTIALS) 
           : null;
           
-        if (!credentials || !credentials.client_email) {
-          console.error("Google credentials are missing or invalid");
-          // Continue without Google Docs content
-        } else {
+        if (credentials?.client_email) {
           const auth = new google.auth.GoogleAuth({
             credentials,
             scopes: ['https://www.googleapis.com/auth/documents.readonly'],
