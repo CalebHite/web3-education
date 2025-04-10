@@ -33,6 +33,9 @@ interface Section {
 export default function ContractBuilder() {
   const [contractData, setContractData] = useState<ContractFormData>({
     name: 'MyToken',
+    tokenName: 'MyToken',
+    tokenSymbol: 'MTK',
+    initialSupply: 1000000,
     variables: [
       { name: 'totalSupply', type: 'uint256', visibility: 'public', defaultValue: '1000000' }
     ],
