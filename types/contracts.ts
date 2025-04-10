@@ -43,4 +43,7 @@ export interface VariableDefinition {
     variables: VariableDefinition[];
     functions: FunctionDefinition[];
     events: EventDefinition[];
+    tokenName: string;
+    tokenSymbol: string;
+    initialSupply: number;
   }
