@@ -120,8 +120,14 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
   }
   
   // Process code blocks
+  let codeBlockOpen = false;
+  let codeStartIndex = -1;
+  
+  // Reset lastIndex to ensure we search from the beginning
+  codeStartRegex.lastIndex = 0;
+  codeEndRegex.lastIndex = 0;
+  
   while ((match = codeStartRegex.exec(fullContent)) !== null) {
-    codeEndRegex.lastIndex = match.index;
     const endMatch = codeEndRegex.exec(fullContent);
     
     if (endMatch) {
@@ -157,46 +163,74 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
   // Step 3: Generate HTML
   let html = '';
   let lastPosition = 0;
+  let skipUntilPosition = -1;
   
+  // Process the document paragraph by paragraph
   for (let i = 0; i <= paragraphBreaks.length; i++) {
     const paragraphEnd = i < paragraphBreaks.length ? paragraphBreaks[i] : fullContent.length;
-    let paragraphContent = fullContent.substring(lastPosition, paragraphEnd);
-    let skipParagraphWrapper = false;
     
-    // Process special blocks in this paragraph
+    // Skip this paragraph if we're inside a special block that spans multiple paragraphs
+    if (skipUntilPosition > lastPosition) {
+      lastPosition = paragraphEnd;
+      continue;
+    }
+    
+    // Get the paragraph text
+    let paragraphContent = fullContent.substring(lastPosition, paragraphEnd);
+    let paragraphProcessed = false;
+    
+    // Get blocks that start or end in this paragraph
     const blocksInParagraph = specialBlocks.filter(block => 
       (block.start >= lastPosition && block.start < paragraphEnd) ||
       (block.end > lastPosition && block.end <= paragraphEnd) ||
       (block.start < lastPosition && block.end > paragraphEnd)
     );
     
+    // Handle blocks in this paragraph
     for (const block of blocksInParagraph) {
-      console.log(block.content);
-      if (block.type === 'code') {
-        const codeHtml = `<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4"><code class="text-sm">${block.content}</code></pre>`;
-        paragraphContent = paragraphContent.replace(block.originalText, codeHtml);
-        skipParagraphWrapper = true;
-      } else if (block.type === 'link') {
-        try {
-          const linkData = JSON.parse(block.content);
-          const linkHtml = `<a href="${linkData.url}" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">${linkData.text}</a>`;
-          paragraphContent = paragraphContent.replace(block.originalText, linkHtml);
-        } catch (e) {
-          console.error('Error processing link:', e);
+      // For blocks that start in this paragraph
+      if (block.start >= lastPosition && block.start < paragraphEnd) {
+        // Add text before the block
+        const textBeforeBlock = fullContent.substring(lastPosition, block.start);
+        if (textBeforeBlock.trim()) {
+          html += `<p class="mb-4">${textBeforeBlock}</p>`;
         }
-      } else if (block.type === 'heading') {
-        html += `<h2 class="text-3xl font-bold my-6">${block.content}</h2>`;
-        skipParagraphWrapper = true;
-      } else if (block.type === 'subheading') {
-        html += `<h3 class="text-2xl font-semibold my-4">${block.content}</h3>`;
-        skipParagraphWrapper = true;
-      } else if (block.type === 'hr') {
-        html += `<hr class="my-8 border-t-2 border-gray-300">`;
-        skipParagraphWrapper = true;
+        
+        // Add the block content
+        if (block.type === 'code') {
+          html += `<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4"><code class="text-sm">${block.content}</code></pre>`;
+          paragraphProcessed = true;
+        } else if (block.type === 'heading') {
+          html += `<h2 class="text-3xl font-bold my-6">${block.content}</h2>`;
+          paragraphProcessed = true;
+        } else if (block.type === 'subheading') {
+          html += `<h3 class="text-2xl font-semibold my-4">${block.content}</h3>`;
+          paragraphProcessed = true;
+        } else if (block.type === 'hr') {
+          html += `<hr class="my-8 border-t-2 border-gray-300">`;
+          paragraphProcessed = true;
+        } else if (block.type === 'link') {
+          try {
+            const linkData = JSON.parse(block.content);
+            const linkHtml = `<a href="${linkData.url}" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">${linkData.text}</a>`;
+            paragraphContent = paragraphContent.replace(block.originalText, linkHtml);
+          } catch (e) {
+            console.error('Error processing link:', e);
+          }
+        }
+        
+        // If the block extends beyond this paragraph, skip until the end of the block
+        if (block.end > paragraphEnd) {
+          skipUntilPosition = block.end;
+        } else {
+          // Otherwise, continue with text after the block in this paragraph
+          lastPosition = block.end;
+        }
       }
     }
     
-    if (!skipParagraphWrapper && paragraphContent.trim()) {
+    // If no blocks or only link blocks were processed, add the paragraph content
+    if (!paragraphProcessed && paragraphContent.trim()) {
       html += `<p class="mb-4">${paragraphContent}</p>`;
     }
     
