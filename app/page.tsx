@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Code } from "lucide-react"
+import { ArrowRight, BookOpenText, GraduationCap, Code } from "lucide-react"
 import Link from "next/link"
 
 import { Button } from "../components/ui/button"
@@ -19,11 +19,11 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         <Card className="overflow-hidden transition-all hover:shadow-lg">
           <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
             <CardTitle className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Lessons
             </CardTitle>
             <CardDescription>Learn about blockchain and earn KUBIX</CardDescription>
@@ -61,6 +61,28 @@ export default function Home() {
             <Button asChild variant="secondary" className="w-full">
               <Link href="/contract-builder">
                 Open Sandbox <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card className="overflow-hidden transition-all hover:shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-600 dark:to-amber-600">
+            <CardTitle className="flex items-center gap-2">
+              <BookOpenText  className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              Resources
+            </CardTitle>
+            <CardDescription>Educational web3 resources</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <p>
+              This collection of educational and informational resources is designed to assist your Web3 journey.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild variant="secondary" className="w-full mt-6">
+              <Link href="/resources">
+                View Resources <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </CardFooter>
