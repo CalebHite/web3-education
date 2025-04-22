@@ -11,6 +11,7 @@ export interface Lesson {
   createdAt?: Date;
   updatedAt?: Date;
   ipfsHash?: string;
+  authKey: string; // Required field for authentication
 }
 
 // Pinata API configuration
@@ -116,10 +117,16 @@ export async function getAllLessons(): Promise<Lesson[]> {
         console.log("Fetching lesson content for hash:", pin.ipfs_pin_hash);
         const lesson = await getLesson(pin.ipfs_pin_hash);
         console.log("Retrieved lesson:", lesson);
-        lessons.push({
-          ...lesson,
-          ipfsHash: pin.ipfs_pin_hash,
-        });
+        
+        // Only include lessons that have an authKey
+        if (lesson.authKey) {
+          lessons.push({
+            ...lesson,
+            ipfsHash: pin.ipfs_pin_hash,
+          });
+        } else {
+          console.log(`Skipping lesson with hash ${pin.ipfs_pin_hash} - no authKey found`);
+        }
       } catch (error) {
         console.error(`Error retrieving lesson with hash ${pin.ipfs_pin_hash}:`, error);
         // Continue with other lessons even if one fails
