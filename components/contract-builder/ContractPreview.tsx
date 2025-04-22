@@ -37,7 +37,7 @@ pragma solidity ^0.8.20;
     if (data.variables.length > 0) {
       code += '    // State variables\n';
       data.variables.forEach(variable => {
-        code += `    ${variable.visibility} ${variable.type} ${variable.name}`;
+        code += `    ${variable.type} ${variable.visibility} ${variable.name}`;
         if (variable.defaultValue) {
           code += ` = ${variable.defaultValue}`;
         }
@@ -47,18 +47,18 @@ pragma solidity ^0.8.20;
     }
 
     // Events
-    if (data.events.length > 0) {
-      code += '    // Events\n';
-      data.events.forEach(event => {
-        code += `    event ${event.name}(`;
-        event.parameters.forEach((param, idx) => {
-          if (idx > 0) code += ', ';
-          code += `${param.indexed ? 'indexed ' : ''}${param.type} ${param.name}`;
-        });
-        code += ');\n';
+  if (data.events.length > 0) {
+    code += '    // Events\n';
+    data.events.forEach(event => {
+      code += `    event ${event.name}(`;
+      event.parameters.forEach((param, idx) => {
+        if (idx > 0) code += ', ';
+        code += `${param.type} ${param.indexed ? 'indexed ' : ''}${param.name}`;
       });
-      code += '\n';
-    }
+      code += ');\n';
+    });
+    code += '\n';
+  }
 
     // Functions
     if (data.functions.length > 0) {

@@ -11,6 +11,7 @@ import FunctionsSection from '@/components/contract-builder/FunctionsSection';
 import EventsSection from '@/components/contract-builder/EventsSection';
 import ContractPreview from '@/components/contract-builder/ContractPreview';
 import { VariableDefinition, FunctionDefinition, EventDefinition } from '@/types/contracts';
+import { compileContract, deployContract } from '@/utils/contractUtils';
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -32,22 +33,25 @@ interface Section {
 export default function ContractBuilder() {
   const [contractData, setContractData] = useState<ContractFormData>({
     name: 'MyToken',
-    variables: [{ name: 'totalSupply', type: 'uint256', visibility: 'private' }],
-    functions: [{ 
-      name: 'mint', 
-      inputs: [{ name: 'to', type: 'address' }, { name: 'amount', type: 'uint256' }], 
-      outputs: [{ type: 'bool' }],
-      visibility: 'public',
-      stateMutability: 'nonpayable'
-    }],
-    events: [{ 
-      name: 'Transfer', 
-      parameters: [
+    tokenName: 'MyToken',
+    tokenSymbol: 'MTK',
+    initialSupply: 1000000,
+    variables: [
+      { name: 'totalSupply', type: 'uint256', visibility: 'public', defaultValue: '1000000' }
+    ],
+    functions: [
+      { name: 'transfer', visibility: 'public', stateMutability: 'nonpayable', inputs: [
+        { name: 'to', type: 'address' },
+        { name: 'amount', type: 'uint256' }
+      ], outputs: [], code: 'require(amount <= totalSupply); totalSupply -= amount;' }
+    ],
+    events: [
+      { name: 'Transfer', parameters: [
         { name: 'from', type: 'address', indexed: true },
         { name: 'to', type: 'address', indexed: true },
-        { name: 'value', type: 'uint256', indexed: false }
-      ] 
-    }],
+        { name: 'amount', type: 'uint256', indexed: false }
+      ] }
+    ],
     inherits: ['ERC20'],
   });
 
@@ -105,20 +109,8 @@ export default function ContractBuilder() {
 
   const handleCompileAndDeploy = async () => {
     try {
-      const solidityCode = generateSolidityCode(contractData);
-      
-      const response = await fetch('/api/compile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sourceCode: solidityCode,
-          contractName: contractData.name,
-        }),
-      });
-
-      const compilationResult = await response.json();
+      console.log(contractData);
+      const compilationResult = await compileContract(contractData);
       
       if (!compilationResult.success) {
         throw new Error(compilationResult.error);
@@ -140,75 +132,17 @@ export default function ContractBuilder() {
     }
   };
 
-  const generateSolidityCode = (data: ContractFormData): string => {
-    const inherits = data.inherits && data.inherits.length > 0 ? ` is ${data.inherits.join(', ')}` : '';
-    
-    const variables = data.variables.map(v => 
-      `    ${v.visibility} ${v.type} ${v.name};`
-    ).join('\n');
-    
-    const functions = data.functions.map(f => {
-      const inputs = f.inputs.map(i => `${i.type} ${i.name}`).join(', ');
-      const outputs = f.outputs.map(o => o.type).join(', ');
-      const returnType = outputs ? ` returns (${outputs})` : '';
-      
-      return `    ${f.visibility} ${f.stateMutability} function ${f.name}(${inputs})${returnType} {
-          // Function implementation
-      }`;
-    }).join('\n\n');
-    
-    const events = data.events.map(e => {
-      const params = e.parameters.map(p => 
-        `${p.type} ${p.indexed ? 'indexed ' : ''}${p.name}`
-      ).join(', ');
-      
-      return `    event ${e.name}(${params});`;
-    }).join('\n');
-    
-    return `// SPDX-License-Identifier: MIT
-      pragma solidity ^0.8.0;
-
-      ${data.inherits?.map(i => `import "@openzeppelin/contracts/${i}.sol";`).join('\n') || ''}
-
-      contract ${data.name}${inherits} {
-      ${variables ? `\n    // State Variables\n${variables}\n` : ''}
-      ${events ? `\n    // Events\n${events}\n` : ''}
-      ${functions ? `\n    // Functions\n${functions}\n` : ''}
-      }`;
-  };
-
   const handleDeploy = async () => {
     if (!compiledContract || !privateKey) return;
     
     setIsDeploying(true);
     try {
-      const args = JSON.parse(constructorArgs);
-      
-      const providerUrl = 
-        network === 'sepolia' ? 'https://eth-sepolia.public.blastapi.io' :
-        network === 'goerli' ? 'https://eth-goerli.public.blastapi.io' :
-        'http://localhost:8545';
-      
-      const response = await fetch('/api/deploy', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          abi: compiledContract.abi,
-          bytecode: compiledContract.bytecode,
-          providerUrl,
-          privateKey,
-          constructorArgs: args,
-        }),
-      });
-      
-      const data = await response.json();
-      setDeploymentResult(data);
+      const deploymentResult = await deployContract(compiledContract, network, privateKey, constructorArgs);
+      setDeploymentResult(deploymentResult);
     } catch (error: unknown) {
       setDeploymentResult({
         success: false,
-        message: `Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`
+        message: `Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
       });
     } finally {
       setIsDeploying(false);
