@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { getAllLessons } from "../../app/pinata"
 import { useEffect, useState } from "react"
 
+import Header from "@/components/Header";
+
 // Define the base lesson data structure from the API
 type BaseLesson = {
   id?: string
@@ -122,12 +124,8 @@ export default function LessonsPage() {
   }, []);
 
   return (
-    <main className="container mx-auto px-8 py-4 md:py-24">
-      <div className="flex justify-between items-center mb-12">
-        <Link href="/" className="flex items-center hover:text-blue-500">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
-        </Link>
-      </div>
+    <main className="container mx-auto px-8 md:py-10">
+      <Header />
       
       <div className="mb-12 text-center">
         <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl lg:text-6xl">

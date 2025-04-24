@@ -1,4 +1,5 @@
 import { docs_v1, google } from 'googleapis';
+import Header from '@/components/Header';
 
 // Function to extract document ID from Google Docs URL
 function extractDocumentId(url: string): string | null {
@@ -9,6 +10,7 @@ function extractDocumentId(url: string): string | null {
 
 function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
   if (!document.body?.content) {
+    
     return '';
   }
   
@@ -144,10 +146,10 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
           html += `<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4"><code class="text-sm">${block.content}</code></pre>`;
           paragraphProcessed = true;
         } else if (block.type === 'heading') {
-          html += `<h2 class="text-3xl font-bold my-6">${block.content}</h2>`;
+          html += `<h2 class="text-2xl font-bold my-6">${block.content}</h2>`;
           paragraphProcessed = true;
         } else if (block.type === 'subheading') {
-          html += `<h3 class="text-2xl font-semibold my-4">${block.content}</h3>`;
+          html += `<h3 class="text-xl font-semibold my-4">${block.content}</h3>`;
           paragraphProcessed = true;
         } else if (block.type === 'hr') {
           html += `<hr class="my-8 border-t-2 border-gray-300">`;
@@ -215,8 +217,12 @@ export default async function Resources() {
   }
 
   return <main>
+    <div className='mt-8 ml-8'>
+    <Header />
+    <h1 className="text-5xl font-bold my-6">Resources</h1>
+    </div>
     {docsContent ? (
-      <div className="prose prose-lg dark:prose-invert max-w-none border rounded-lg p-8 shadow-md">
+      <div className="prose prose-lg dark:prose-invert max-w-none rounded-lg p-8 pt-0 shadow-md">
         <div dangerouslySetInnerHTML={{ __html: docsContent }} />
       </div>
     ) : (

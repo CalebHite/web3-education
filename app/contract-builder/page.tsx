@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import { ContractFormData } from '@/types/contracts';
 import ContractNameSection from '@/components/contract-builder/ContractNameSection';
 import VariablesSection from '@/components/contract-builder/VariablesSection';
@@ -12,6 +11,8 @@ import EventsSection from '@/components/contract-builder/EventsSection';
 import ContractPreview from '@/components/contract-builder/ContractPreview';
 import { VariableDefinition, FunctionDefinition, EventDefinition } from '@/types/contracts';
 import { compileContract, deployContract } from '@/utils/contractUtils';
+
+import Header from "@/components/Header";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -151,9 +152,7 @@ export default function ContractBuilder() {
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <Link href="/" className="flex items-center mb-12 hover:text-blue-500">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Home
-      </Link>
+      <Header />
       <h1 className="mb-6 text-3xl font-bold tracking-tight">Smart Contract Builder</h1>
 
       <div className="max-w-4xl">

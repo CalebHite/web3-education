@@ -298,10 +298,8 @@ export default async function LessonPage({
     
     return (
       <main className="container mx-auto px-8 py-4 md:py-24">
+        <Header />
         <div className="flex justify-between items-center mb-12">
-          <Link href="/lessons" className="flex items-center hover:text-blue-500">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Lessons
-          </Link>
           <Link href={`/lessons/${hash}/study`} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
             <p className="text-xl font-semibold">Quiz Me</p>
           </Link>
