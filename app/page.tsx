@@ -21,29 +21,6 @@ export default function Home() {
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="overflow-hidden transition-all hover:shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              Lessons
-            </CardTitle>
-            <CardDescription>Learn about blockchain and earn KUBIX</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <p>
-              Our interactive lessons cover everything from blockchain basics to advanced concepts. Complete lessons to
-              earn KUBIX tokens and track your progress.
-            </p>
-          </CardContent>
-          <CardFooter>
-            <Button asChild className="w-full">
-              <Link href="/lessons">
-                Open Lessons <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card className="overflow-hidden transition-all hover:shadow-lg">
           <CardHeader className="bg-gradient-to-r from-red-100 to-rose-100 dark:from-red-950/50 dark:to-rose-950/50">
             <CardTitle className="flex items-center gap-2">
               <Code className="h-5 w-5 text-red-600 dark:text-rose-400" />
@@ -65,7 +42,28 @@ export default function Home() {
             </Button>
           </CardFooter>
         </Card>
-
+        <Card className="overflow-hidden transition-all hover:shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
+            <CardTitle className="flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              Lessons
+            </CardTitle>
+            <CardDescription>Learn about blockchain and earn KUBIX</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <p>
+              Our interactive lessons cover everything from blockchain basics to advanced concepts. Complete lessons to
+              earn KUBIX tokens and track your progress.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link href="/lessons">
+                Open Lessons <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </CardFooter>
+        </Card>
         <Card className="overflow-hidden transition-all hover:shadow-lg">
           <CardHeader className="bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-600 dark:to-amber-600">
             <CardTitle className="flex items-center gap-2">
