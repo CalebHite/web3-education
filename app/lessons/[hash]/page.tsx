@@ -240,6 +240,15 @@ function convertDocsContentToHtml(document: docs_v1.Schema$Document): string {
   return html;
 }
 
+// Add a CSS class for dynamic font size
+const titleStyle = {
+  maxWidth: '100%',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  fontSize: 'clamp(1.5rem, 2.5vw, 2.5rem)',
+};
+
 export default async function LessonPage({ 
   params,
   searchParams 
@@ -298,16 +307,21 @@ export default async function LessonPage({
     
     return (
       <main className="container mx-auto px-8 py-4 md:py-24">
-        <Header />
-        <div className="flex justify-between items-center mb-12">
+        <div className="flex justify-start items-center mb-4">
+          <Link href="/lessons" className="flex items-center gap-2 text-black hover:text-blue-600">
+            <ArrowLeft className="h-5 w-5" />
+            <span>Back to Lessons</span>
+          </Link>
+        </div>
+        <div className="flex justify-end items-center mb-12">
           <Link href={`/lessons/${hash}/study`} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
             <p className="text-xl font-semibold">Quiz Me</p>
           </Link>
         </div>
-        
+
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl flex items-center gap-3">
+            <h1 className="mb-4 text-4xl font-extrabold tracking-tight md:text-5xl flex items-center gap-3" style={titleStyle}>
               <IconComponent className="h-8 w-8 text-blue-600 dark:text-blue-400" />
               {lesson.title}
             </h1>
@@ -321,7 +335,7 @@ export default async function LessonPage({
               )}
             </div>
           </div>
-          
+
           {docsContent ? (
             <div className="prose prose-lg dark:prose-invert max-w-none border rounded-lg p-8 shadow-md">
               <div dangerouslySetInnerHTML={{ __html: docsContent }} />
@@ -337,7 +351,7 @@ export default async function LessonPage({
       </main>
     );
   } catch (error) {
-    console.error(`Error retrieving lesson with hash ${hash}:`, error);
-    notFound();
+    console.error("Error fetching lesson:", error);
+    return notFound();
   }
 }
